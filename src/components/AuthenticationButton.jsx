@@ -1,12 +1,12 @@
 import Button from '@mui/material/Button';
-import config from '../config';
 
 export default function AuthenticationButton() {
     const spotifyApi = 'https://accounts.spotify.com';
+    const client_id = process.env.CLIENT_ID;
 
     const authenticateUser = async () => {
         const authOptions = {
-            client_id: config.client_id,
+            client_id: client_id,
             response_type: 'code',
             redirect_uri: 'http://localhost:1234/callback'
         };

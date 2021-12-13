@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router';
-import config from '../config';
-
 export default function useAuth() {
     const navigate = useNavigate();
     const location = useLocation();
+    const client_id = process.env.CLIENT_ID;
+    const client_secret = process.env.CLIENT_SECRET;
 
     useEffect(async () => {
         if (location.pathname === '/callback') {
@@ -22,7 +22,7 @@ export default function useAuth() {
                     method: 'POST',
                     headers: {
                         'content-type': 'application/x-www-form-urlencoded',
-                        Authorization: `Basic ${btoa(`${config.client_id}:${config.client_secret}`)}`
+                        Authorization: `Basic ${btoa(`${client_id}:${client_secret}`)}`
                     }
                 }
             );
@@ -31,6 +31,8 @@ export default function useAuth() {
 
             if (data.access_token) {
                 localStorage.setItem('token', data.access_token);
+            }else{
+                console.error('error in token set up');
             }
 
             navigate('/');

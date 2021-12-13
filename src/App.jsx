@@ -1,5 +1,5 @@
 import AppBar from '@mui/material/AppBar';
-import ToolBar from '@mui/material/ToolBar';
+import ToolBar from '@material-ui/core/Toolbar';
 import Typography from '@mui/material/Typography';
 import CssBaseline from '@mui/material/CssBaseline';
 import Container from '@mui/material/Container';

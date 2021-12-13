@@ -1,4 +1,0 @@
-export default config = {
-    client_id: 'CLIENT_ID',
-    client_secret: 'CLIENT_SECRET'
-};
