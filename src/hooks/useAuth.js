@@ -31,6 +31,7 @@ export default function useAuth() {
 
             if (data.access_token) {
                 localStorage.setItem('token', data.access_token);
+                localStorage.setItem('refresh_token', data.refresh_token);
             }else{
                 console.error('error in token set up');
             }

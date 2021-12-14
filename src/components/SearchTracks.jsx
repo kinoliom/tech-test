@@ -6,13 +6,70 @@ import Button from '@mui/material/Button';
 import { useState } from 'react';
 
 export default function SearchTracks() {
+    // tracks is managed value
+    // setTracks fucntion to be called to set a new track
     const [tracks, setTracks] = useState([]);
+    const [searchQuery, setSearchQuery] = useState();
+
+
+    const refreshToken =  async () => {
+        const client_id = process.env.CLIENT_ID;
+        const client_secret = process.env.CLIENT_SECRET;
+        const refresh_token = localStorage.getItem('refresh_token');
+
+        const body = new URLSearchParams({
+            grant_type: 'refresh_token',
+            refresh_token: refresh_token
+        });
+        
+        const response = await fetch(
+            'https://accounts.spotify.com/api/token',
+            {
+                body,
+                method: 'POST',
+                headers: {
+                    'content-type': 'application/x-www-form-urlencoded',
+                    Authorization: `Basic ${btoa(`${client_id}:${client_secret}`)}`
+                }
+            }
+        );
+        const data = await response.json();
+        if (data.access_token) {
+            localStorage.setItem('token', data.access_token);
+            localStorage.setItem('refresh_token', data.refresh_token);
+            return true;
+        }
+        return false
+    }
+
+
+
+    const handleSearchClick = async () => {
+        if (!searchQuery){
+            return
+        }
+        console.log(searchQuery);
+        const token = localStorage.getItem('token');
+        const response = fetch(
+                `https://api.spotify.com/v1/search?q=${searchQuery}&type=track&limit=5&access_token=${token}`,
+                {
+                    method: 'GET',
+                }
+            );
+        const data = await (await response).json();
+
+        if (data?.error?.status === 401){
+            console.log("TOKEN EXPIRED");
+            refreshToken();
+        }
+        setTracks(data.tracks.items);
+    }
 
     return (
         <Grid container mt={0} mb={4} flexDirection="column">
             <Grid item container mb={2} mt={2}>
-                <TextField mt={2}/>
-                <Button variant="contained" sx={{marginLeft: 2}}>Search</Button>
+                <TextField mt={2} onChange={event => setSearchQuery(event.target.value)} required={true}/>
+                <Button variant="contained" sx={{marginLeft: 2}} onClick={handleSearchClick}>Search</Button>
             </Grid>
             <Grid item container spacing={4}>
                 {tracks.map((track) => (
