@@ -5,6 +5,8 @@ import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 import { useState } from 'react';
 
+let offset = 0;
+
 export default function SearchTracks() {
     // tracks is managed value
     // setTracks fucntion to be called to set a new track
@@ -44,14 +46,18 @@ export default function SearchTracks() {
 
 
 
-    const handleSearchClick = async () => {
+    const handleSearchClick = async (event) => {
         if (!searchQuery){
             return
         }
-        console.log(searchQuery);
+        if(event){
+            // temporary patch
+            setTracks([]);
+            offset = 0;
+        }
         const token = localStorage.getItem('token');
         const response = fetch(
-                `https://api.spotify.com/v1/search?q=${searchQuery}&type=track&limit=5&access_token=${token}`,
+                `https://api.spotify.com/v1/search?q=${searchQuery}&type=track&limit=20&access_token=${token}&offset=${offset}`,
                 {
                     method: 'GET',
                 }
@@ -62,7 +68,18 @@ export default function SearchTracks() {
             console.log("TOKEN EXPIRED");
             refreshToken();
         }
-        setTracks(data.tracks.items);
+        setTracks([...tracks, ...data.tracks.items]);
+    }
+
+    const handleBottomScroll = (event) => {
+        //scrollHeight indicates the height of an element (including non visible elements)
+        //scrollTop (var) indicates number of pixels that an element is scrolled vertically
+        //clientHeith indicates element inner height (defined by maxHeight below)
+        if (event.target.scrollHeight - event.target.scrollTop === event.target.clientHeight) {
+            offset += 20;
+            handleSearchClick();
+            //user is at the end of the list so load more items
+        } 
     }
 
     return (
@@ -71,7 +88,7 @@ export default function SearchTracks() {
                 <TextField mt={2} onChange={event => setSearchQuery(event.target.value)} required={true}/>
                 <Button variant="contained" sx={{marginLeft: 2}} onClick={handleSearchClick}>Search</Button>
             </Grid>
-            <Grid item container spacing={4}>
+            <Grid item container spacing={4} style={{maxHeight:700,overflowY:'scroll'}} onScroll={handleBottomScroll} >
                 {tracks.map((track) => (
                     <Grid item key={track.id}>
                         <Card sx={{height: '100%', display: 'flex', flexDirection: 'column' }}>
